@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    environment {
+        //once you sign up for Docker hub, use that user_id here
+       registry = "kuberneteschallenge/smartconseil"
+       dockerImage = ''
+    }
+    //Checkout
+    stages {
+        stage('Checkout') {
+            steps {
+            checkout([$class: 'GitSCM', branches: [[name: '**']], extensions: [], userRemoteConfigs: [[ url: 'https://github.com/AhmedJarraya999/smart-conseil-cicd.git']]])
+        }
+        }
+
+         // Building Docker images
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build(registry, ".") 
+        }
+      }
+    }
+    
+    
+    stage('Pushing image') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+    
+    
+    
+    
+    
+    }  
+}
